@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import { MdDelete } from 'react-icons/md';
 import { useConfirm } from 'material-ui-confirm';
-import {deletePost, raedPost, readPosts, toggleLikes} from '../utility/crudUtility';
+import {deletePost, readPost, readPosts, toggleLikes} from '../utility/crudUtility';
 import { delPhoto } from '../utility/uploadFile';
 import { Alerts } from '../components/Alerts'
 
@@ -21,7 +21,7 @@ export const Detail = () => {
 
 
 	useEffect(()=>{
-		raedPost(params.id,setPost)
+		readPost(params.id,setPost)
 	},[])
 
 	const handleDelete=async()=>{
