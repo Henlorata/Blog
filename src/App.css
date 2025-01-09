@@ -1,0 +1,71 @@
+.page{
+	min-height: 100vh;
+}
+
+.imagesContainer{
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	flex-wrap: wrap !important;
+	margin-top: 10% !important;
+	gap: 20px;
+}
+
+.imagesContainer img{
+	margin-left: 15px;
+	width: 34.5vh;
+	height: 35vh;
+	object-position: center;
+	object-fit: cover;
+	border: 3px solid rgb(87, 9, 9);
+	border-radius: 10px;
+}
+
+body{
+	background-color: rgb(87, 9, 9) !important;
+	color: white !important;
+}
+
+.headerContainer{
+	color: white!important;
+}
+
+.myavatar{
+	width:30px;
+	height: 30px;
+	border-radius: 50%;
+}
+
+.card{
+	width: 23rem;
+	padding: 10px;
+	background-color: rgb(143, 121, 121) !important;
+	color: rgb(87, 9, 9) !important;
+	text-align: center;
+	border-radius: 15px!important;
+}
+
+h5{
+	font-size: 25px!important;
+	font-weight: bold !important;
+}
+
+.line{
+	width: 20%;
+	border: 2px solid rgb(197, 181, 181);
+	border-radius: 5px;
+	margin:auto;
+}
+
+h1{
+	text-align: center;
+	font-weight: bold !important;
+	color: rgb(143, 121, 121) !important;
+	margin-top: 20px!important;
+}
+
+.nav-link{
+	color: rgb(87, 9, 9)!important;
+	font-size: 17px!important;
+	font-weight: bold!important;
+}
