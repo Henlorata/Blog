@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import { MdDelete } from 'react-icons/md';
 import { useConfirm } from 'material-ui-confirm';
-import {deletePost, readPost, readPosts, toggleLikes} from '../utility/crudUtility';
+import {deletePost, readPost, toggleLikes} from '../utility/crudUtility';
 import { delPhoto } from '../utility/uploadFile';
 import { Alerts } from '../components/Alerts'
 
@@ -63,6 +63,7 @@ export const Detail = () => {
 		<>
 			<button onClick={handleDelete}><MdDelete/></button>
 			<button /*onClick={()=>navigate('/update/'+post.id)}*/>Edit</button>
+			<button onClick={() => navigate('/update/'+post.id)}></button>
 		</>
 		}
 		{txt && <Alerts txt={txt} err={false}/>}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { useContext } from 'react'
 import { UserContext } from '../context/UserContext'
 import { Home } from './Home'
@@ -6,10 +6,11 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Story } from '../components/Story'
 import { uploadFile } from '../utility/uploadFile'
-import { addPost } from '../utility/crudUtility'
+import {addPost, readPost} from '../utility/crudUtility'
 import { CategContext } from '../context/CategContext'
 import { CategDropdown } from '../components/CategDropdown'
 import { Alerts } from '../components/Alerts'
+import {useParams} from "react-router-dom";
 
 export const AddEditPost = () => {
 	const { categories } = useContext(CategContext)
@@ -19,8 +20,21 @@ export const AddEditPost = () => {
 	const [photo, setPhoto] = useState(null)
 	const [story, setStory] = useState(null)
 	const [selCateg, setSelCateg] = useState(null)
-	const { register, handleSubmit, formState: { errors }, reset } = useForm();
+	const [post, setPost] = useState(null)
+	const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
+	const params = useParams()
 
+	useEffect(() => {
+		if (params.id) readPost(params.id, setPost)
+	}, [params.id]);
+
+	useEffect(() => {
+		if (post) {
+			setValue('title', post.title)
+			setSelCateg(post.category)
+			setStory(post.story)
+		}
+	}, [post, setValue]);
 
 	if (!user) return <Home />
 
