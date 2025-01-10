@@ -40,9 +40,10 @@ export const AddEditPost = () => {
 			const file = data?.file ? data.file[0] : null;
 			const {url,id} = file ? await uploadFile(file) : {}
 			delete newPostData.file
+			console.log("CUCC: ", url,id);
 			newPostData = {...newPostData, photo: {url,id}}
 			console.log('postData',newPostData);
-			
+
 			addPost(newPostData)
 			setUploaded(true)
 			reset()
