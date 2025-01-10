@@ -62,8 +62,7 @@ export const Detail = () => {
 		{user && post && (user.uid===post.userId) &&
 		<>
 			<button onClick={handleDelete}><MdDelete/></button>
-			<button /*onClick={()=>navigate('/update/'+post.id)}*/>Edit</button>
-			<button onClick={() => navigate('/update/'+post.id)}></button>
+			<button onClick={() => navigate('/update/'+post.id)}>Edit</button>
 		</>
 		}
 		{txt && <Alerts txt={txt} err={false}/>}
