@@ -12,10 +12,10 @@ export const Home = () => {
     console.log(categories);
 
     return (
-        <div className='title'>
+        <div className='title' style={{display: 'flex', flexDirection: 'column', flexWrap: 'nowrap', alignItems: 'center'}}>
             <h1>Take a look</h1>
             <hr className='line'></hr>
-            <div className='imagesContainer'>
+            <div className='imagesContainer' style={{maxWidth: '1400px'}}>
                 {categories && categories.map(obj =>
                     <CategoryCard name={obj.name} photoUrl={obj.photoUrl} key={obj.name}/>
                 )}

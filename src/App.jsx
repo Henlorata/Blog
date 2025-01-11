@@ -12,11 +12,12 @@ import {NotFound} from './pages/NotFound'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {DeleteAccount} from './components/DeleteAccount'
 import {Detail} from './pages/Detail'
+import {Navbar} from "./components/Navbar.jsx";
 
 const router = createBrowserRouter(
     [
         {
-            element: <Header/>,
+            element: <Navbar/>,
             children: [
                 {path: '/', element: <Home/>},
                 {path: '/posts', element: <Posts/>},
