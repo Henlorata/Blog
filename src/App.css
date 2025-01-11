@@ -11,15 +11,15 @@
     gap: 20px;
 }
 
-.imagesContainer img {
-    margin-left: 15px;
-    width: 34.5vh;
-    height: 35vh;
-    object-position: center;
-    object-fit: cover;
-    border: 3px solid rgb(87, 9, 9);
-    border-radius: 10px;
-}
+/*.imagesContainer img {*/
+/*    margin-left: 15px;*/
+/*    width: 34.5vh;*/
+/*    height: 35vh;*/
+/*    object-position: center;*/
+/*    object-fit: cover;*/
+/*    border: 3px solid rgb(87, 9, 9);*/
+/*    border-radius: 10px;*/
+/*}*/
 
 body {
     background-color: rgb(87, 9, 9) !important;

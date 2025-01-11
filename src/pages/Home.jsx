@@ -3,6 +3,7 @@ import {useContext} from 'react'
 import {CategContext} from '../context/CategContext'
 import {Card, CardBody, CardTitle} from 'reactstrap'
 import {NavLink} from 'react-router-dom'
+import {CategoryCard} from "../components/CategoryCard.jsx";
 
 
 export const Home = () => {
@@ -16,15 +17,7 @@ export const Home = () => {
             <hr className='line'></hr>
             <div className='imagesContainer'>
                 {categories && categories.map(obj =>
-                    <Card className="card">
-                        <img alt="Sample" src={obj.photoUrl}/>
-                        <CardBody>
-                            <CardTitle tag="h5">
-                                <NavLink to={'/posts?ctg=' + obj.name}>{obj.name}</NavLink>
-                            </CardTitle>
-
-                        </CardBody>
-                    </Card>
+                    <CategoryCard name={obj.name} photoUrl={obj.photoUrl} key={obj.name}/>
                 )}
             </div>
         </div>
