@@ -20,7 +20,7 @@ export const SearchBox = ({items}) => {
     const handleOnSelect = (item) => {
         // the item selected
         console.log(item)
-        navigate("/detail/"+item.id)
+        navigate("/detail/" + item.id)
     }
 
     const handleOnFocus = () => {

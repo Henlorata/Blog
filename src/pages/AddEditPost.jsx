@@ -13,111 +13,111 @@ import {Alerts} from '../components/Alerts'
 import {useParams} from "react-router-dom";
 
 export const AddEditPost = () => {
-  const {categories} = useContext(CategContext)
-  const {user} = useContext(UserContext)
-  const [loading, setLoading] = useState(false)
-  const [uploaded, setUploaded] = useState(false)
-  const [photo, setPhoto] = useState(null)
-  const [story, setStory] = useState(null)
-  const [selCateg, setSelCateg] = useState(null)
-  const [post, setPost] = useState(null)
-  const {register, handleSubmit, formState: {errors}, reset, setValue} = useForm();
-  const params = useParams()
+    const {categories} = useContext(CategContext)
+    const {user} = useContext(UserContext)
+    const [loading, setLoading] = useState(false)
+    const [uploaded, setUploaded] = useState(false)
+    const [photo, setPhoto] = useState(null)
+    const [story, setStory] = useState(null)
+    const [selCateg, setSelCateg] = useState(null)
+    const [post, setPost] = useState(null)
+    const {register, handleSubmit, formState: {errors}, reset, setValue} = useForm();
+    const params = useParams()
 
-  useEffect(() => {
-    if (params.id) readPost(params.id, setPost)
-  }, [params.id]);
+    useEffect(() => {
+        if (params.id) readPost(params.id, setPost)
+    }, [params.id]);
 
-  useEffect(() => {
-    if (post) {
-      setValue('title', post.title)
-      setSelCateg(post.category)
-      setStory(post.story)
-    }
-  }, [post]);
+    useEffect(() => {
+        if (post) {
+            setValue('title', post.title)
+            setSelCateg(post.category)
+            setStory(post.story)
+        }
+    }, [post]);
 
-  if (!user) return <Home/>
+    if (!user) return <Home/>
 
-  const onSubmit = async (data) => {
-    setLoading(true)
-    console.log('paramsid: ', params.id);
-    if (params.id) {
-      console.log("UPDATE")
-      try {
-        await updatePost(params.id, {title: data.title, category: selCateg, story})
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false)
-      }
-    } else {
-
-      let newPostData = {
-        ...data,
-        story,
-        author: user.displayName,
-        userId: user.uid,
-        category: selCateg,
-        likes: []
-      }
-      console.log('postData: ', newPostData);
-
-      try {
-        const file = data?.file ? data.file[0] : null;
-        const {url, id} = file ? await uploadFile(file) : {}
-        delete newPostData.file
-        console.log("CUCC: ", url, id);
-        newPostData = {...newPostData, photo: {url, id}}
-        console.log('postData', newPostData);
-
-        await addPost(newPostData)
-        setUploaded(true)
-        reset()
-        setPhoto(null)
-        setStory(null)
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-  console.log(story);
-
-
-  return (
-    <div className='page'>
-      <form onSubmit={handleSubmit(onSubmit)}>
-
-        <div><label>Post name: </label>
-          <input {...register('title', {required: true})} type='text'/>
-          <p className='text-danger'>{errors.title && 'Naming the post is required'}</p>
-          <CategDropdown categories={categories} setSelCateg={setSelCateg} selCateg={selCateg}/>
-          <Story setStory={setStory} uploaded={uploaded}/>
-        </div>
-        <div><label>Avatar: </label>
-          <input disabled={params.id} {...register('file', params.id ? {} : {
-            required: true,
-            validate: (value) => {
-              if (!value[0]) return true
-              const acceptedFormats = ['jpg', 'png']
-              console.log(value[0]);
-              const fileExtension = value[0].name.split('.').pop().toLowerCase()
-              if (!acceptedFormats.includes(fileExtension)) return "Invalid file format"
-              if (value[0].size > 1 * 1000 * 1024) return "Maximum file size 1MB!"
-              return true
+    const onSubmit = async (data) => {
+        setLoading(true)
+        console.log('paramsid: ', params.id);
+        if (params.id) {
+            console.log("UPDATE")
+            try {
+                await updatePost(params.id, {title: data.title, category: selCateg, story})
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false)
             }
-          })} type='file'
-                 onChange={(e) => setPhoto(URL.createObjectURL(e.target.files[0]))}
-          />
-          <p className='text-danger'>{errors?.file?.message}</p>
-        </div>
-        <input type="submit" disabled={!selCateg || !story}/>
-      </form>
-      {loading && <p>Loading...</p>}
-      {uploaded && <Alerts txt='Successfully uploaded!'/>}
-      {photo && <img src={photo}/>}
-    </div>
+        } else {
 
-  )
+            let newPostData = {
+                ...data,
+                story,
+                author: user.displayName,
+                userId: user.uid,
+                category: selCateg,
+                likes: []
+            }
+            console.log('postData: ', newPostData);
+
+            try {
+                const file = data?.file ? data.file[0] : null;
+                const {url, id} = file ? await uploadFile(file) : {}
+                delete newPostData.file
+                console.log("CUCC: ", url, id);
+                newPostData = {...newPostData, photo: {url, id}}
+                console.log('postData', newPostData);
+
+                await addPost(newPostData)
+                setUploaded(true)
+                reset()
+                setPhoto(null)
+                setStory(null)
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+    console.log(story);
+
+
+    return (
+        <div className='page'>
+            <form onSubmit={handleSubmit(onSubmit)}>
+
+                <div><label>Post name: </label>
+                    <input {...register('title', {required: true})} type='text'/>
+                    <p className='text-danger'>{errors.title && 'Naming the post is required'}</p>
+                    <CategDropdown categories={categories} setSelCateg={setSelCateg} selCateg={selCateg}/>
+                    <Story setStory={setStory} uploaded={uploaded}/>
+                </div>
+                <div><label>Avatar: </label>
+                    <input disabled={params.id} {...register('file', params.id ? {} : {
+                        required: true,
+                        validate: (value) => {
+                            if (!value[0]) return true
+                            const acceptedFormats = ['jpg', 'png']
+                            console.log(value[0]);
+                            const fileExtension = value[0].name.split('.').pop().toLowerCase()
+                            if (!acceptedFormats.includes(fileExtension)) return "Invalid file format"
+                            if (value[0].size > 1 * 1000 * 1024) return "Maximum file size 1MB!"
+                            return true
+                        }
+                    })} type='file'
+                           onChange={(e) => setPhoto(URL.createObjectURL(e.target.files[0]))}
+                    />
+                    <p className='text-danger'>{errors?.file?.message}</p>
+                </div>
+                <input type="submit" disabled={!selCateg || !story}/>
+            </form>
+            {loading && <p>Loading...</p>}
+            {uploaded && <Alerts txt='Successfully uploaded!'/>}
+            {photo && <img src={photo}/>}
+        </div>
+
+    )
 }

@@ -22,7 +22,7 @@ export const Posts = () => {
 
     return (<div className='page'>
         <Categories selCateg={selCateg} setSelCateg={setSelCateg}/>
-        {posts && <SearchBox items={posts.map(obj => ({id: obj.id, name: obj.title}))} />}
+        {posts && <SearchBox items={posts.map(obj => ({id: obj.id, name: obj.title}))}/>}
         <CardsContainer posts={posts}/>
     </div>)
 }

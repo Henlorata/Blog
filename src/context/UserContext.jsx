@@ -1,7 +1,13 @@
 import React from 'react'
 import {auth} from '../utility/firebaseApp'
 import {
-    createUserWithEmailAndPassword, deleteUser, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile, sendPasswordResetEmail
+    createUserWithEmailAndPassword,
+    deleteUser,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    updateProfile,
+    sendPasswordResetEmail
 } from 'firebase/auth'
 import {createContext} from 'react'
 import {useState} from 'react'
@@ -77,8 +83,8 @@ export const UserProvider = ({children}) => {
     const updateUser = async (displayName, photoURL) => {
         try {
             if (displayName && photoURL) await updateProfile(auth.currentUser, {displayName, photoURL})
-			else if (displayName) await updateProfile(auth.currentUser, {displayName})
-			else if (photoURL) await updateProfile(auth.currentUser, {photoURL})
+            else if (displayName) await updateProfile(auth.currentUser, {displayName})
+            else if (photoURL) await updateProfile(auth.currentUser, {photoURL})
             setMsg({})//
             setMsg({update: "Successfully updated"})//
         } catch (error) {
