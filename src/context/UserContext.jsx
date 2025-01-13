@@ -81,16 +81,36 @@ export const UserProvider = ({children}) => {
         }
     }
     const updateUser = async (displayName, photoURL) => {
+        console.log(displayName, photoURL);
         try {
-            if (displayName && photoURL) await updateProfile(auth.currentUser, {displayName, photoURL})
-            else if (displayName) await updateProfile(auth.currentUser, {displayName})
-            else if (photoURL) await updateProfile(auth.currentUser, {photoURL})
-            setMsg({})//
-            setMsg({update: "Successfully updated"})//
+            const updatedFields = {};
+            if (displayName) updatedFields.displayName = displayName;
+            if (photoURL) updatedFields.photoURL = photoURL;
+
+            // Ensure there are changes to update
+            if (Object.keys(updatedFields).length === 0) {
+                setMsg({ err: "No changes were made." });
+                return;
+            }
+
+            console.log("Updating user with fields:", updatedFields);
+
+            // Perform the update on Firebase
+            await updateProfile(auth.currentUser, updatedFields);
+
+            // Update local user state
+            const updatedUser = { ...auth.currentUser, ...updatedFields };
+            setUser(updatedUser);
+
+            // Provide success feedback
+            setMsg({ update: "Profile updated successfully!" });
         } catch (error) {
-            setMsg({err: error.message})//
+            console.error("Error updating user profile:", error);
+            setMsg({ err: error.message });
         }
-    }
+    };
+
+
 
     const deleteAccount = async () => {
         try {
@@ -118,4 +138,4 @@ export const UserProvider = ({children}) => {
     }}>
         {children}
     </UserContext.Provider>)
-} 
+}

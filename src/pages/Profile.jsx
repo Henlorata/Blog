@@ -11,14 +11,15 @@ import {
 } from '@mui/material';
 import { UserContext } from '../context/UserContext';
 import { useForm } from 'react-hook-form';
-import { uploadFile } from '../utility/uploadFile';
+import {delPhoto, uploadFile} from '../utility/uploadFile';
 import { Toastify } from '../components/Toastify';
 import { extractUrlAndId } from '../utility/utils';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 
 export const Profile = () => {
     const { user, updateUser, msg, setMsg } = useContext(UserContext);
-    const [avatar, setAvatar] = useState(null);
+    const [avatar, setAvatar] = useState(null); // For preview
+    const [file, setFile] = useState(null); // For submission
     const [loading, setLoading] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
@@ -33,44 +34,51 @@ export const Profile = () => {
         }
     }, [user]);
 
-    const onSubmit = async (data) => {
-        const newUsername = data.displayName.trim();
-        const file = data?.file ? data.file[0] : null;
-        let fileUrl = null;
-        let fileId = null;
-
-        // Check if any changes are made
-        if (!newUsername && !file) {
-            setMsg({ err: 'No changes to save' });
-            return;
+    const handleFileChange = (event) => {
+        const selectedFile = event.target.files[0];
+        if (selectedFile) {
+            setAvatar(URL.createObjectURL(selectedFile)); // Update preview
+            setFile(selectedFile); // Store file for upload
         }
+    };
 
+    const onSubmit = async (data) => {
         setLoading(true);
-
         try {
-            if (file) {
-                const uploadResponse = await uploadFile(file);
+            let fileUrl = user.photoURL; // Default to the current user's photoURL
+            let newFileId = null;
 
+            // Upload the new file if it exists
+            if (file) {
+                // Delete the previous photo if it exists
+                if (user.photoURL) {
+                    const { id: currentFileId } = extractUrlAndId(user.photoURL);
+                    await delPhoto(currentFileId);
+                    console.log("Deleted previous photo with ID:", currentFileId);
+                }
+
+                // Upload the new file
+                const uploadResponse = await uploadFile(file);
                 if (uploadResponse) {
-                    const { url, id } = uploadResponse;
-                    fileUrl = url;
-                    fileId = id;
+                    fileUrl = `${uploadResponse.url}/${uploadResponse.id}`;
+                    newFileId = uploadResponse.id;
+                    console.log("Uploaded new photo URL:", fileUrl);
                 } else {
-                    throw new Error('File upload failed');
+                    throw new Error("File upload failed");
                 }
             }
 
-            const updatedUsername = newUsername || user.displayName;
-            const updatedPhotoURL = fileUrl ? `${fileUrl}/${fileId}` : user.photoURL;
-
-            updateUser(updatedUsername, updatedPhotoURL);
+            // Update user details
+            await updateUser(data.displayName || user.displayName, fileUrl);
         } catch (error) {
-            console.error(error);
-            Toastify({ message: error.message, type: 'error' });
+            console.error("Error during profile update:", error);
+            Toastify({ message: error.message, type: "error" });
         } finally {
             setLoading(false);
         }
     };
+
+
 
     return (
         <Box
@@ -108,19 +116,20 @@ export const Profile = () => {
                         >
                             <PhotoCamera />
                             <input
-                                {...register('file', {
+                                type="file"
+                                accept="image/png, image/jpeg"
+                                {...register("file", {
                                     validate: (value) => {
                                         if (!value[0]) return true;
-                                        const acceptedFormats = ['jpg', 'png'];
-                                        const fileExtension = value[0].name.split('.').pop().toLowerCase();
-                                        if (!acceptedFormats.includes(fileExtension)) return 'Invalid file format';
-                                        if (value[0].size > 1 * 1000 * 1024) return 'Maximum file size 1MB!';
+                                        const acceptedFormats = ["jpg", "png"];
+                                        const fileExtension = value[0].name.split(".").pop().toLowerCase();
+                                        if (!acceptedFormats.includes(fileExtension)) return "Invalid file format";
+                                        if (value[0].size > 1 * 1024 * 1024) return "File size exceeds 1MB";
                                         return true;
                                     },
                                 })}
-                                type="file"
                                 hidden
-                                onChange={(e) => setAvatar(URL.createObjectURL(e.target.files[0]))}
+                                onChange={handleFileChange}
                             />
                         </IconButton>
                         {errors.file && (
