@@ -5,7 +5,6 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 import { useNavigate } from 'react-router-dom';
-import './CategoryCard.css';
 
 export const CategoryCard = ({ name, photoUrl }) => {
   const navigate = useNavigate();
