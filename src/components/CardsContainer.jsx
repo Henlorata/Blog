@@ -4,6 +4,7 @@ import {Post} from "./Post.jsx";
 
 
 export const CardsContainer = ({posts}) => {
+    console.log(posts)
     return (
         <div className='cardsContainer'>
             {posts && posts.map(obj => <Post key={obj.id} {...obj}/>)}

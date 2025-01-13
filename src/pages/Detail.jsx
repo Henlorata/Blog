@@ -32,8 +32,8 @@ export const Detail = () => {
                 cancellationText: "No",
                 title: "Are you sure you want to delete your account?"
             })
-            deletePost(post.id)
-            delPhoto(post.photo.id)
+            await deletePost(post.id)
+            await delPhoto(post.photo.id)
             navigate('/posts')
         } catch (error) {
             console.log("Cancel: ", error);
