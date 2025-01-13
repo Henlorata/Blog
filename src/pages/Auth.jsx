@@ -57,7 +57,7 @@ export const Auth = () => {
     };
 
     return (
-        <Grid container justifyContent="center" alignItems="center" sx={{ minHeight: '100vh' }}>
+        <Grid container justifyContent="center" alignItems="center" sx={{ minHeight: 'calc(100vh - 80px)' }}>
             <Grid item xs={11} sm={8} md={5}>
                 <Paper elevation={3} sx={{ padding: '32px', textAlign: 'center', borderRadius: '8px' }}>
                     <Typography variant="h4" gutterBottom>
