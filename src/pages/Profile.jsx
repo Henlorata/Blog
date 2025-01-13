@@ -22,6 +22,8 @@ import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { auth } from '../utility/firebaseApp';
+
 
 export const Profile = () => {
     const { user, updateUser, deleteAccount } = useContext(UserContext);
@@ -89,8 +91,8 @@ export const Profile = () => {
         console.log("Delete account triggered with password:", password);
         setDeleting(true);
         try {
-            const credential = EmailAuthProvider.credential(user.email, password);
-            await reauthenticateWithCredential(user, credential);
+            const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
+            await reauthenticateWithCredential(auth.currentUser, credential);
 
             if (user.photoURL) {
                 const { id: currentFileId } = extractUrlAndId(user.photoURL);
@@ -101,13 +103,20 @@ export const Profile = () => {
             console.log("Account deleted successfully");
             toast.success('Account deleted successfully!');
         } catch (error) {
-            console.error("Error in account deletion:", error.message);
-            toast.error(`Error: ${error.message}`);
+            console.error("Error in account deletion:", error);
+            if (error.code === 'auth/user-token-expired') {
+                toast.error("Session expired. Please log in again.");
+            } else if (error.code === 'auth/wrong-password') {
+                toast.error("Incorrect password. Please try again.");
+            } else {
+                toast.error(`Error: ${error.message}`);
+            }
         } finally {
             setDeleting(false);
             setOpenDialog(false);
         }
     };
+
 
     return (
         <Box
