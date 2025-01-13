@@ -27,7 +27,8 @@
     "react-search-autocomplete": "^8.5.2",
     "react-simple-wysiwyg": "^3.2.0",
     "react-toastify": "^10.0.6",
-    "reactstrap": "^9.2.3"
+    "reactstrap": "^9.2.3",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
