@@ -17,6 +17,7 @@ export const Home = () => {
             sx={{
                 maxWidth: '1200px',
                 margin: '0 auto',
+                marginTop: '20px',
                 padding: '20px',
                 backgroundColor: 'background.default',
                 borderRadius: '8px',
