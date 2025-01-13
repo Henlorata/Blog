@@ -2,6 +2,11 @@
 /*    min-height: 100vh;*/
 /*}*/
 
+
+#root {
+    background: linear-gradient(rgb(227, 242, 253), rgb(245, 245, 245)) !important;
+}
+
 .imagesContainer {
     display: flex !important;
     align-items: center !important;
