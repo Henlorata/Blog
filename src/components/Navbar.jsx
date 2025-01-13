@@ -177,6 +177,12 @@ export const Navbar = () => {
                             >
                                 {user && (
                                     <>
+                                        {/* New MenuItem to show display name */}
+                                        <MenuItem disabled>
+                                            <Typography variant="body1" sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                                {user.displayName || 'Guest'}
+                                            </Typography>
+                                        </MenuItem>
                                         <MenuItem key={'Profile'} onClick={handleCloseUserMenu}>
                                             <NavLink to={'/profile'} style={{
                                                 textDecoration: 'none',
