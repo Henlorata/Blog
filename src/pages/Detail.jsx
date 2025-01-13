@@ -52,18 +52,19 @@ export const Detail = () => {
 
     return (
         <Box
-            className="page"
             sx={{
                 maxWidth: 800,
                 margin: '20px auto',
                 padding: '20px',
-                boxShadow: 3,
+                backgroundColor: 'background.default',
                 borderRadius: '8px',
-                backgroundColor: '#fff',
+                boxShadow: 3,
+                display: 'flex',
+                flexDirection: 'column',
             }}
         >
             {post && (
-                <Card>
+                <Card sx={{ flexGrow: 1 }}>
                     <CardMedia
                         component="img"
                         height="300"

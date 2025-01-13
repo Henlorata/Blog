@@ -1,54 +1,27 @@
-import React from 'react'
-import {ReactSearchAutocomplete} from 'react-search-autocomplete'
-import {useNavigate} from "react-router-dom";
+import React from 'react';
+import { ReactSearchAutocomplete } from 'react-search-autocomplete';
+import { useNavigate } from 'react-router-dom';
 
-export const SearchBox = ({items}) => {
-
-    const navigate = useNavigate()
-
-    const handleOnSearch = (string, results) => {
-        // onSearch will have as the first callback parameter
-        // the string searched and for the second the results.
-        console.log(string, results)
-    }
-
-    const handleOnHover = (result) => {
-        // the item hovered
-        console.log(result)
-    }
+export const SearchBox = ({ items }) => {
+    const navigate = useNavigate();
 
     const handleOnSelect = (item) => {
-        // the item selected
-        console.log(item)
-        navigate("/detail/" + item.id)
-    }
-
-    const handleOnFocus = () => {
-        console.log('Focused')
-    }
-
-    const formatResult = (item) => {
-        return (
-            <span style={{display: 'block', textAlign: 'left'}}>name: {item.name}</span>
-        )
-    }
+        navigate(`/detail/${item.id}`);
+    };
 
     return (
-        <div className="App">
-            <header className="App-header">
-                <div style={{width: 400}}>
-                    <ReactSearchAutocomplete
-                        items={items}
-                        onSearch={handleOnSearch}
-                        onHover={handleOnHover}
-                        onSelect={handleOnSelect}
-                        onFocus={handleOnFocus}
-                        autoFocus
-                        formatResult={formatResult}
-                        styling={{zIndex: 1000}}
-                    />
-                </div>
-            </header>
+        <div style={{ width: '100%' }}>
+            <ReactSearchAutocomplete
+                items={items}
+                onSelect={handleOnSelect}
+                placeholder="Search posts..."
+                styling={{
+                    border: '1px solid #ccc',
+                    borderRadius: '8px',
+                    zIndex: 1000,
+                    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+                }}
+            />
         </div>
-    )
-}
+    );
+};

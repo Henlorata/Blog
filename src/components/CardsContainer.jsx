@@ -1,14 +1,20 @@
-import React from 'react'
-import {MyCard} from './MyCard'
-import {Post} from "./Post.jsx";
+import React from 'react';
+import { Box } from '@mui/material';
+import { Post } from './Post.jsx';
 
-
-export const CardsContainer = ({posts}) => {
-    console.log(posts)
+export const CardsContainer = ({ posts }) => {
     return (
-        <div className='cardsContainer'>
-            {posts && posts.map(obj => <Post key={obj.id} {...obj}/>)}
-        </div>
-    )
-}
-
+        <Box
+            sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 2,
+                justifyContent: 'center',
+            }}
+        >
+            {posts.map((obj) => (
+                <Post key={obj.id} {...obj} />
+            ))}
+        </Box>
+    );
+};

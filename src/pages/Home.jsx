@@ -1,43 +1,68 @@
-import React, { useContext } from 'react';
+import React from 'react';
+import { useContext } from 'react';
 import { CategContext } from '../context/CategContext';
-import { Box, Typography } from '@mui/material';
-import { CategoryCard } from '../components/CategoryCard.jsx';
+import { Box, Typography, Grid, Card, CardContent, CardMedia } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 export const Home = () => {
     const { categories } = useContext(CategContext);
+    const navigate = useNavigate();
+
+    const handleCategoryClick = (name) => {
+        navigate(`/posts?ctg=${name}`);
+    };
 
     return (
         <Box
-            className="title"
             sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 2,
-                padding: 2,
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: '20px',
+                backgroundColor: 'background.default',
+                borderRadius: '8px',
+                boxShadow: 3,
             }}
         >
-            <h1>Take a look</h1>
-            <hr className='line'></hr>
-            <Box
-                className="imagesContainer"
-                sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 2,
-                    justifyContent: 'center',
-                    maxWidth: '1400px',
-                }}
-            >
-                {categories &&
-                    categories.map((obj) => (
-                        <CategoryCard
-                            name={obj.name}
-                            photoUrl={obj.photoUrl}
-                            key={obj.name}
-                        />
-                    ))}
+            {/* Header Section */}
+            <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
+                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                    Explore Categories
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                    Click on a category to see posts related to it.
+                </Typography>
             </Box>
+
+            {/* Categories Section */}
+            <Grid container spacing={3}>
+                {categories &&
+                    categories.map((category) => (
+                        <Grid item xs={12} sm={6} md={4} key={category.id}>
+                            <Card
+                                sx={{
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.2s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.05)',
+                                    },
+                                }}
+                                onClick={() => handleCategoryClick(category.name)}
+                            >
+                                <CardMedia
+                                    component="img"
+                                    height="140"
+                                    image={category.photoUrl}
+                                    alt={category.name}
+                                />
+                                <CardContent>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {category.name}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+            </Grid>
         </Box>
     );
 };
