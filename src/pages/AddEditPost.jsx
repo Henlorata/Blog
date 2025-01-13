@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Box, TextField, Button, Typography, Paper, MenuItem, CircularProgress } from '@mui/material';
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Paper,
+    MenuItem,
+    CircularProgress,
+} from '@mui/material';
 import { UserContext } from '../context/UserContext';
 import { CategContext } from '../context/CategContext';
 import { uploadFile } from '../utility/uploadFile';
@@ -15,35 +23,39 @@ export const AddEditPost = () => {
     const [loading, setLoading] = useState(false);
     const [uploaded, setUploaded] = useState(false);
     const [photoPreview, setPhotoPreview] = useState(null);
-    const [file, setFile] = useState(null); // Manually manage file input
+    const [file, setFile] = useState(null);
     const [story, setStory] = useState('');
     const [selCateg, setSelCateg] = useState('');
     const [post, setPost] = useState(null);
+    const [isAuthor, setIsAuthor] = useState(true); // Track if user is the author
+    const navigate = useNavigate();
     const params = useParams();
 
     const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm();
 
-    // Watch input fields
-    const watchTitle = watch('title');
-
     useEffect(() => {
         if (params.id) {
-            readPost(params.id, setPost);
+            readPost(params.id, (retrievedPost) => {
+                setPost(retrievedPost);
+                if (retrievedPost?.userId !== user?.uid) {
+                    setIsAuthor(false);
+                }
+            });
         }
-    }, [params.id]);
+    }, [params.id, user]);
 
     useEffect(() => {
-        if (post) {
+        if (post && isAuthor) {
             setValue('title', post.title);
             setSelCateg(post.category);
             setStory(post.story);
+            if (post.photo?.url) setPhotoPreview(post.photo.url);
         }
-    }, [post, setValue]);
+    }, [post, isAuthor, setValue]);
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
         if (selectedFile) {
-            // Validate the file manually
             const acceptedFormats = ['jpg', 'png'];
             const extension = selectedFile.name.split('.').pop().toLowerCase();
             if (!acceptedFormats.includes(extension)) {
@@ -60,6 +72,11 @@ export const AddEditPost = () => {
     };
 
     const onSubmit = async (data) => {
+        if (!isAuthor) {
+            alert('You are not authorized to edit this post.');
+            return;
+        }
+
         setLoading(true);
         try {
             let photo = post?.photo || {};
@@ -73,10 +90,6 @@ export const AddEditPost = () => {
                 photo = { url, id };
             }
 
-            if (!story) {
-                throw new Error('A story is required.');
-            }
-
             const newPostData = {
                 title: data.title,
                 story,
@@ -84,7 +97,7 @@ export const AddEditPost = () => {
                 author: user.displayName,
                 userId: user.uid,
                 photo,
-                likes: [],
+                likes: post?.likes || [],
             };
 
             if (params.id) {
@@ -99,13 +112,11 @@ export const AddEditPost = () => {
             }
         } catch (error) {
             console.error('Error saving post:', error.message);
-            alert(error.message); // Display error feedback to the user
+            alert(error.message);
         } finally {
             setLoading(false);
         }
     };
-
-    const isFormValid = !!watchTitle && !!selCateg && !!story && (params.id || !!file);
 
     if (!user) {
         return (
@@ -113,6 +124,23 @@ export const AddEditPost = () => {
                 <Typography variant="h5" color="text.secondary">
                     Please log in to create or edit posts.
                 </Typography>
+            </Box>
+        );
+    }
+
+    if (!isAuthor && params.id) {
+        return (
+            <Box textAlign="center" mt={5}>
+                <Typography variant="h5" color="error">
+                    You are not authorized to edit this post.
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => navigate('/posts')}
+                >
+                    Go Back
+                </Button>
             </Box>
         );
     }
@@ -154,7 +182,6 @@ export const AddEditPost = () => {
                         onChange={(e) => setSelCateg(e.target.value)}
                         error={!selCateg}
                         helperText={!selCateg && 'Please select a category'}
-                        required
                     >
                         {categories?.map((category) => (
                             <MenuItem key={category.id} value={category.name}>
@@ -201,7 +228,7 @@ export const AddEditPost = () => {
                             type="submit"
                             variant="contained"
                             color="primary"
-                            disabled={!isFormValid || loading}
+                            disabled={!selCateg || !story || loading}
                         >
                             {loading ? <CircularProgress size={24} /> : params.id ? 'Update Post' : 'Create Post'}
                         </Button>

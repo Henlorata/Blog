@@ -1,44 +1,58 @@
-import React from 'react'
-import {useContext} from 'react';
-
-import {useForm} from 'react-hook-form';
-import {UserContext} from '../context/UserContext';
-import {useState} from 'react';
-import {uploadFile} from '../utility/uploadFile';
-import {Toastify} from '../components/Toastify';
-import {useEffect} from 'react';
-import {extractUrlAndId} from '../utility/utils';
-
+import React, { useContext, useState, useEffect } from 'react';
+import {
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Avatar,
+    CircularProgress,
+    Paper,
+    IconButton,
+} from '@mui/material';
+import { UserContext } from '../context/UserContext';
+import { useForm } from 'react-hook-form';
+import { uploadFile } from '../utility/uploadFile';
+import { Toastify } from '../components/Toastify';
+import { extractUrlAndId } from '../utility/utils';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
 
 export const Profile = () => {
-    const {user, updateUser, msg} = useContext(UserContext)
-    const [photo, setPhoto] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [avatar, setAvatar] = useState(null)
+    const { user, updateUser, msg, setMsg } = useContext(UserContext);
+    const [avatar, setAvatar] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        user?.photoURL && setAvatar(extractUrlAndId(user.photoURL).url)
-    }, [user])
-
-    const {register, handleSubmit, formState: {errors}} = useForm({
+    const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
-            displayName: user?.displayName || ''
-        }
+            displayName: user?.displayName || '',
+        },
     });
 
-    const onSubmit = async (data) => {
-        setLoading(true);
-        console.log(data.displayName);
-        try {
-            const file = data?.file ? data.file[0] : null;
-            let fileUrl = null;
-            let fileId = null;
+    useEffect(() => {
+        if (user?.photoURL) {
+            setAvatar(extractUrlAndId(user.photoURL).url);
+        }
+    }, [user]);
 
+    const onSubmit = async (data) => {
+        const newUsername = data.displayName.trim();
+        const file = data?.file ? data.file[0] : null;
+        let fileUrl = null;
+        let fileId = null;
+
+        // Check if any changes are made
+        if (!newUsername && !file) {
+            setMsg({ err: 'No changes to save' });
+            return;
+        }
+
+        setLoading(true);
+
+        try {
             if (file) {
                 const uploadResponse = await uploadFile(file);
 
                 if (uploadResponse) {
-                    const {url, id} = uploadResponse;
+                    const { url, id } = uploadResponse;
                     fileUrl = url;
                     fileId = id;
                 } else {
@@ -46,48 +60,99 @@ export const Profile = () => {
                 }
             }
 
-            updateUser(data.displayName, fileUrl ? `${fileUrl}/${fileId}` : user.photoURL);
+            const updatedUsername = newUsername || user.displayName;
+            const updatedPhotoURL = fileUrl ? `${fileUrl}/${fileId}` : user.photoURL;
+
+            updateUser(updatedUsername, updatedPhotoURL);
         } catch (error) {
-            console.log(error);
-            Toastify({message: error.message, type: 'error'});
+            console.error(error);
+            Toastify({ message: error.message, type: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className='page'>
-            <div>
-                <h3>Account settings</h3>
-                <form onSubmit={handleSubmit(onSubmit)}>
-
-                    <div><label>Username: </label>
-                        <input {...register('displayName')} placeholder='username' type='text'/>
-                    </div>
-                    <div><label>Profile pic: </label>
-                        <input {...register('file', {
-                            validate: (value) => {
-                                if (!value[0]) return true
-                                const acceptedFormats = ['jpg', 'png']
-                                console.log(value[0]);
-                                const fileExtension = value[0].name.split('.').pop().toLowerCase()
-                                if (!acceptedFormats.includes(fileExtension)) return "Invalid file format"
-                                if (value[0].size > 1 * 1000 * 1024) return "Maximum file size 1MB!"
-                                return true
-                            }
-                        })} type='file'
-                               onChange={(e) => setAvatar(URL.createObjectURL(e.target.files[0]))}
+        <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: 'calc(100vh - 93px)',
+                backgroundColor: 'background.default',
+            }}
+        >
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: 4,
+                    maxWidth: 400,
+                    width: '100%',
+                    borderRadius: 2,
+                    textAlign: 'center',
+                }}
+            >
+                <Typography variant="h5" fontWeight="bold" gutterBottom>
+                    Account Settings
+                </Typography>
+                <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: '20px' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <Avatar
+                            src={avatar || '/static/images/avatar/placeholder.jpg'}
+                            sx={{ width: 100, height: 100, mb: 2 }}
                         />
-                    </div>
-                    <input type="submit"/>
+                        <IconButton
+                            color="primary"
+                            component="label"
+                            sx={{ position: 'relative' }}
+                        >
+                            <PhotoCamera />
+                            <input
+                                {...register('file', {
+                                    validate: (value) => {
+                                        if (!value[0]) return true;
+                                        const acceptedFormats = ['jpg', 'png'];
+                                        const fileExtension = value[0].name.split('.').pop().toLowerCase();
+                                        if (!acceptedFormats.includes(fileExtension)) return 'Invalid file format';
+                                        if (value[0].size > 1 * 1000 * 1024) return 'Maximum file size 1MB!';
+                                        return true;
+                                    },
+                                })}
+                                type="file"
+                                hidden
+                                onChange={(e) => setAvatar(URL.createObjectURL(e.target.files[0]))}
+                            />
+                        </IconButton>
+                        {errors.file && (
+                            <Typography variant="body2" color="error">
+                                {errors.file.message}
+                            </Typography>
+                        )}
+
+                        <TextField
+                            {...register('displayName')}
+                            fullWidth
+                            label="Username"
+                            variant="outlined"
+                            error={!!errors.displayName}
+                            helperText={errors.displayName && 'Username is required'}
+                        />
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            disabled={loading}
+                            sx={{ mt: 2 }}
+                        >
+                            {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'}
+                        </Button>
+                    </Box>
                 </form>
-                {loading && <p>Loading...</p>}
-                {msg && <Toastify {...msg}/>}
-                {avatar && <img src={avatar}/>}
-            </div>
 
-        </div>
-    )
-}
-
-
+                {msg && <Toastify {...msg} />}
+            </Paper>
+        </Box>
+    );
+};
