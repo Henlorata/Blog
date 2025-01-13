@@ -81,34 +81,30 @@ export const UserProvider = ({children}) => {
         }
     }
     const updateUser = async (displayName, photoURL) => {
-        console.log(displayName, photoURL);
+        console.log("updateUser called with:", displayName, photoURL);
         try {
             const updatedFields = {};
             if (displayName) updatedFields.displayName = displayName;
             if (photoURL) updatedFields.photoURL = photoURL;
 
-            // Ensure there are changes to update
             if (Object.keys(updatedFields).length === 0) {
                 setMsg({ err: "No changes were made." });
                 return;
             }
 
-            console.log("Updating user with fields:", updatedFields);
-
-            // Perform the update on Firebase
             await updateProfile(auth.currentUser, updatedFields);
 
-            // Update local user state
             const updatedUser = { ...auth.currentUser, ...updatedFields };
             setUser(updatedUser);
 
-            // Provide success feedback
+            console.log("Updated user:", updatedUser);
             setMsg({ update: "Profile updated successfully!" });
         } catch (error) {
             console.error("Error updating user profile:", error);
             setMsg({ err: error.message });
         }
     };
+
 
 
 

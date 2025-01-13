@@ -31,17 +31,23 @@ export const Profile = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm({
+    // Separate forms for name change and delete account
+    const { register: registerName, handleSubmit: handleSubmitName, formState: { errors: errorsName }, reset: resetName } = useForm({
         defaultValues: {
             displayName: user?.displayName || '',
         },
     });
 
+    const { register: registerDelete, handleSubmit: handleSubmitDelete, formState: { errors: errorsDelete } } = useForm();
+
     useEffect(() => {
         if (user?.photoURL) {
             setAvatar(extractUrlAndId(user.photoURL).url);
         }
-    }, [user]);
+        if (user?.displayName) {
+            resetName({ displayName: user.displayName });
+        }
+    }, [user, resetName]);
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
@@ -52,6 +58,7 @@ export const Profile = () => {
     };
 
     const onSubmit = async (data) => {
+        console.log("Name change form submitted:", data.displayName);
         setLoading(true);
         try {
             let fileUrl = user.photoURL;
@@ -68,8 +75,10 @@ export const Profile = () => {
                 }
             }
             await updateUser(data.displayName || user.displayName, fileUrl);
+            console.log("User updated with:", data.displayName, fileUrl);
             toast.success('Profile updated successfully!');
         } catch (error) {
+            console.error("Error in name change:", error.message);
             toast.error(`Error: ${error.message}`);
         } finally {
             setLoading(false);
@@ -77,6 +86,7 @@ export const Profile = () => {
     };
 
     const handleDeleteAccount = async (password) => {
+        console.log("Delete account triggered with password:", password);
         setDeleting(true);
         try {
             const credential = EmailAuthProvider.credential(user.email, password);
@@ -88,8 +98,10 @@ export const Profile = () => {
             }
 
             await deleteAccount();
+            console.log("Account deleted successfully");
             toast.success('Account deleted successfully!');
         } catch (error) {
+            console.error("Error in account deletion:", error.message);
             toast.error(`Error: ${error.message}`);
         } finally {
             setDeleting(false);
@@ -120,53 +132,45 @@ export const Profile = () => {
                 <Typography variant="h5" fontWeight="bold" gutterBottom>
                     Account Settings
                 </Typography>
-                <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: '20px' }}>
+                {/* Name Change Form */}
+                <form onSubmit={handleSubmitName(onSubmit)} style={{ marginTop: '20px' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                        <Avatar
-                            src={avatar || '/static/images/avatar/placeholder.jpg'}
-                            sx={{ width: 100, height: 100, mb: 2 }}
-                        />
+                        <Avatar src={avatar || '/static/images/avatar/placeholder.jpg'} sx={{ width: 100, height: 100, mb: 2 }} />
                         <IconButton
                             color="primary"
                             component="label"
-                            sx={{ position: 'relative' }}
+                            sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
                         >
                             <PhotoCamera />
-                            <input
-                                type="file"
-                                accept="image/png, image/jpeg"
-                                hidden
-                                onChange={handleFileChange}
-                            />
+                            <input type="file" hidden accept="image/*" onChange={handleFileChange} />
                         </IconButton>
-                        {errors.file && (
-                            <Typography variant="body2" color="error">
-                                {errors.file.message}
-                            </Typography>
-                        )}
-
                         <TextField
-                            {...register('displayName')}
+                            {...registerName('displayName', { required: 'Username is required' })}
                             fullWidth
                             label="Username"
                             variant="outlined"
-                            error={!!errors.displayName}
-                            helperText={errors.displayName && 'Username is required'}
+                            error={!!errorsName.displayName}
+                            helperText={errorsName.displayName && errorsName.displayName.message}
                         />
-
                         <Button
                             type="submit"
                             variant="contained"
                             color="primary"
                             fullWidth
-                            disabled={loading}
                             sx={{ mt: 2 }}
                         >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'}
+                            Save Changes
                         </Button>
                     </Box>
                 </form>
-
+                {/* Delete Account Button and Dialog */}
                 <Button
                     variant="outlined"
                     color="error"
@@ -176,7 +180,6 @@ export const Profile = () => {
                 >
                     Delete Account
                 </Button>
-
                 <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                     <DialogTitle>Delete Account</DialogTitle>
                     <DialogContent>
@@ -189,17 +192,17 @@ export const Profile = () => {
                             label="Password"
                             type="password"
                             fullWidth
-                            {...register('password', { required: 'Password is required' })}
-                            error={!!errors.password}
-                            helperText={errors.password && 'Password is required'}
+                            {...registerDelete('password', { required: 'Password is required' })}
+                            error={!!errorsDelete.password}
+                            helperText={errorsDelete.password && 'Password is required'}
                         />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
                         <Button
-                            onClick={handleSubmit((data) => handleDeleteAccount(data.password))}
-                            disabled={deleting}
+                            onClick={handleSubmitDelete((data) => handleDeleteAccount(data.password))}
                             color="error"
+                            disabled={deleting}
                         >
                             {deleting ? <CircularProgress size={24} color="inherit" /> : 'Confirm'}
                         </Button>
