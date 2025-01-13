@@ -19,16 +19,6 @@ export const Post = ({id, title, category, story, photo}) => {
     return (
         <Card sx={{width: 345}}>
             <CardHeader
-                avatar={
-                    <Avatar sx={{bgcolor: red[500]}} aria-label="recipe">
-                        R
-                    </Avatar>
-                }
-                action={
-                    <IconButton aria-label="settings">
-                        <MoreVertIcon/>
-                    </IconButton>
-                }
                 title={title}
                 subheader={category}
                 onClick={() => navigate("/detail/" + id)}
@@ -45,14 +35,6 @@ export const Post = ({id, title, category, story, photo}) => {
                     {sanitizeHTML(story).substring(0, 30)}
                 </Typography>
             </CardContent>
-            <CardActions disableSpacing>
-                <IconButton aria-label="add to favorites">
-                    <FavoriteIcon/>
-                </IconButton>
-                <IconButton aria-label="share">
-                    <ShareIcon/>
-                </IconButton>
-            </CardActions>
         </Card>
     );
 }
