@@ -1,123 +1,214 @@
-import React, {useEffect} from 'react'
-import {useContext} from 'react'
-import {UserContext} from '../context/UserContext'
-import {Home} from './Home'
-import {useState} from 'react'
-import {useForm} from 'react-hook-form'
-import {Story} from '../components/Story'
-import {uploadFile} from '../utility/uploadFile'
-import {addPost, readPost, updatePost} from '../utility/crudUtility'
-import {CategContext} from '../context/CategContext'
-import {CategDropdown} from '../components/CategDropdown'
-import {Alerts} from '../components/Alerts'
-import {useParams} from "react-router-dom";
+import React, { useEffect, useState, useContext } from 'react';
+import { useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Box, TextField, Button, Typography, Paper, MenuItem, CircularProgress } from '@mui/material';
+import { UserContext } from '../context/UserContext';
+import { CategContext } from '../context/CategContext';
+import { uploadFile } from '../utility/uploadFile';
+import { addPost, readPost, updatePost } from '../utility/crudUtility';
+import { Alerts } from '../components/Alerts';
+import { Story } from '../components/Story';
 
 export const AddEditPost = () => {
-    const {categories} = useContext(CategContext)
-    const {user} = useContext(UserContext)
-    const [loading, setLoading] = useState(false)
-    const [uploaded, setUploaded] = useState(false)
-    const [photo, setPhoto] = useState(null)
-    const [story, setStory] = useState(null)
-    const [selCateg, setSelCateg] = useState(null)
-    const [post, setPost] = useState(null)
-    const {register, handleSubmit, formState: {errors}, reset, setValue} = useForm();
-    const params = useParams()
+    const { user } = useContext(UserContext);
+    const { categories } = useContext(CategContext);
+    const [loading, setLoading] = useState(false);
+    const [uploaded, setUploaded] = useState(false);
+    const [photoPreview, setPhotoPreview] = useState(null);
+    const [file, setFile] = useState(null); // Manually manage file input
+    const [story, setStory] = useState('');
+    const [selCateg, setSelCateg] = useState('');
+    const [post, setPost] = useState(null);
+    const params = useParams();
+
+    const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm();
+
+    // Watch input fields
+    const watchTitle = watch('title');
 
     useEffect(() => {
-        if (params.id) readPost(params.id, setPost)
+        if (params.id) {
+            readPost(params.id, setPost);
+        }
     }, [params.id]);
 
     useEffect(() => {
         if (post) {
-            setValue('title', post.title)
-            setSelCateg(post.category)
-            setStory(post.story)
+            setValue('title', post.title);
+            setSelCateg(post.category);
+            setStory(post.story);
         }
-    }, [post]);
+    }, [post, setValue]);
 
-    if (!user) return <Home/>
-
-    const onSubmit = async (data) => {
-        setLoading(true)
-        console.log('paramsid: ', params.id);
-        if (params.id) {
-            console.log("UPDATE")
-            try {
-                await updatePost(params.id, {title: data.title, category: selCateg, story})
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false)
+    const handleFileChange = (event) => {
+        const selectedFile = event.target.files[0];
+        if (selectedFile) {
+            // Validate the file manually
+            const acceptedFormats = ['jpg', 'png'];
+            const extension = selectedFile.name.split('.').pop().toLowerCase();
+            if (!acceptedFormats.includes(extension)) {
+                alert('Invalid file format. Only JPG and PNG are allowed.');
+                return;
             }
-        } else {
-
-            let newPostData = {
-                ...data,
-                story,
-                author: user.displayName,
-                userId: user.uid,
-                category: selCateg,
-                likes: []
+            if (selectedFile.size > 1 * 1024 * 1024) {
+                alert('File size cannot exceed 1MB.');
+                return;
             }
-            console.log('postData: ', newPostData);
-
-            try {
-                const file = data?.file ? data.file[0] : null;
-                const {url, id} = file ? await uploadFile(file) : {}
-                delete newPostData.file
-                console.log("CUCC: ", url, id);
-                newPostData = {...newPostData, photo: {url, id}}
-                console.log('postData', newPostData);
-
-                await addPost(newPostData)
-                setUploaded(true)
-                reset()
-                setPhoto(null)
-                setStory(null)
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false);
-            }
+            setFile(selectedFile);
+            setPhotoPreview(URL.createObjectURL(selectedFile));
         }
     };
-    console.log(story);
 
+    const onSubmit = async (data) => {
+        setLoading(true);
+        try {
+            let photo = post?.photo || {};
+
+            if (!params.id && !file) {
+                throw new Error('A cover photo is required when creating a new post.');
+            }
+
+            if (file) {
+                const { url, id } = await uploadFile(file);
+                photo = { url, id };
+            }
+
+            if (!story) {
+                throw new Error('A story is required.');
+            }
+
+            const newPostData = {
+                title: data.title,
+                story,
+                category: selCateg,
+                author: user.displayName,
+                userId: user.uid,
+                photo,
+                likes: [],
+            };
+
+            if (params.id) {
+                await updatePost(params.id, newPostData);
+            } else {
+                await addPost(newPostData);
+                setUploaded(true);
+                reset();
+                setStory('');
+                setPhotoPreview(null);
+                setFile(null);
+            }
+        } catch (error) {
+            console.error('Error saving post:', error.message);
+            alert(error.message); // Display error feedback to the user
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const isFormValid = !!watchTitle && !!selCateg && !!story && (params.id || !!file);
+
+    if (!user) {
+        return (
+            <Box textAlign="center" mt={5}>
+                <Typography variant="h5" color="text.secondary">
+                    Please log in to create or edit posts.
+                </Typography>
+            </Box>
+        );
+    }
 
     return (
-        <div className='page'>
-            <form onSubmit={handleSubmit(onSubmit)}>
-
-                <div><label>Post name: </label>
-                    <input {...register('title', {required: true})} type='text'/>
-                    <p className='text-danger'>{errors.title && 'Naming the post is required'}</p>
-                    <CategDropdown categories={categories} setSelCateg={setSelCateg} selCateg={selCateg}/>
-                    <Story setStory={setStory} uploaded={uploaded}/>
-                </div>
-                <div><label>Avatar: </label>
-                    <input disabled={params.id} {...register('file', params.id ? {} : {
-                        required: true,
-                        validate: (value) => {
-                            if (!value[0]) return true
-                            const acceptedFormats = ['jpg', 'png']
-                            console.log(value[0]);
-                            const fileExtension = value[0].name.split('.').pop().toLowerCase()
-                            if (!acceptedFormats.includes(fileExtension)) return "Invalid file format"
-                            if (value[0].size > 1 * 1000 * 1024) return "Maximum file size 1MB!"
-                            return true
-                        }
-                    })} type='file'
-                           onChange={(e) => setPhoto(URL.createObjectURL(e.target.files[0]))}
+        <Box
+            sx={{
+                maxWidth: '800px',
+                margin: 'auto',
+                padding: '32px',
+                backgroundColor: 'background.default',
+                borderRadius: '8px',
+                boxShadow: 3,
+                mt: 3,
+            }}
+        >
+            <Paper elevation={3} sx={{ padding: '24px' }}>
+                <Typography variant="h4" gutterBottom textAlign="center">
+                    {params.id ? 'Edit Post' : 'Create a New Post'}
+                </Typography>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    {/* Post Title */}
+                    <TextField
+                        {...register('title', { required: 'Post title is required' })}
+                        label="Post Title"
+                        fullWidth
+                        margin="normal"
+                        error={!!errors.title}
+                        helperText={errors.title?.message}
                     />
-                    <p className='text-danger'>{errors?.file?.message}</p>
-                </div>
-                <input type="submit" disabled={!selCateg || !story}/>
-            </form>
-            {loading && <p>Loading...</p>}
-            {uploaded && <Alerts txt='Successfully uploaded!'/>}
-            {photo && <img src={photo}/>}
-        </div>
 
-    )
-}
+                    {/* Category Selection */}
+                    <TextField
+                        select
+                        label="Category"
+                        fullWidth
+                        margin="normal"
+                        value={selCateg}
+                        onChange={(e) => setSelCateg(e.target.value)}
+                        error={!selCateg}
+                        helperText={!selCateg && 'Please select a category'}
+                        required
+                    >
+                        {categories?.map((category) => (
+                            <MenuItem key={category.id} value={category.name}>
+                                {category.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+
+                    {/* Story Editor */}
+                    <Box mt={3}>
+                        <Typography variant="body1" gutterBottom>
+                            Story
+                        </Typography>
+                        <Story story={story} setStory={setStory} />
+                        {!story && (
+                            <Typography color="error" variant="body2" mt={1}>
+                                A story is required.
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {/* File Upload */}
+                    {!params.id && (
+                        <Box mt={3}>
+                            <Typography variant="body1" gutterBottom>
+                                Upload Cover Photo
+                            </Typography>
+                            <input
+                                type="file"
+                                accept="image/png, image/jpeg"
+                                onChange={handleFileChange}
+                            />
+                            {photoPreview && (
+                                <Box mt={2} textAlign="center">
+                                    <img src={photoPreview} alt="Preview" style={{ maxWidth: '100%' }} />
+                                </Box>
+                            )}
+                        </Box>
+                    )}
+
+                    {/* Submit Button */}
+                    <Box mt={4} textAlign="center">
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            disabled={!isFormValid || loading}
+                        >
+                            {loading ? <CircularProgress size={24} /> : params.id ? 'Update Post' : 'Create Post'}
+                        </Button>
+                    </Box>
+                </form>
+                {uploaded && <Alerts txt="Successfully uploaded!" />}
+            </Paper>
+        </Box>
+    );
+};
