@@ -30,9 +30,6 @@ export const Header = () => {
     }, [user, user?.photoURL])
 
 
-    console.log(user);
-
-
     const toggle = () => setIsOpen(!isOpen);
 
     return (

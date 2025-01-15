@@ -19,8 +19,6 @@ export const UserProvider = ({children}) => {
     const [user, setUser] = useState(null)
     const [msg, setMsg] = useState(null)
 
-    console.log(msg);
-
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser)
@@ -50,7 +48,6 @@ export const UserProvider = ({children}) => {
             await createUserWithEmailAndPassword(auth, email, password, displayName)
             await updateProfile(auth.currentUser, {displayName})
             console.log('Successfully signed up');
-
         } catch (error) {
             console.log(error);
             setMsg({...msg, err: error.message})
@@ -81,7 +78,6 @@ export const UserProvider = ({children}) => {
         }
     }
     const updateUser = async (displayName, photoURL) => {
-        console.log("updateUser called with:", displayName, photoURL);
         try {
             const updatedFields = {};
             if (displayName) updatedFields.displayName = displayName;
@@ -97,7 +93,6 @@ export const UserProvider = ({children}) => {
             const updatedUser = { ...auth.currentUser, ...updatedFields };
             setUser(updatedUser);
 
-            console.log("Updated user:", updatedUser);
             setMsg({ update: "Profile updated successfully!" });
         } catch (error) {
             console.error("Error updating user profile:", error);

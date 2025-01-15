@@ -47,16 +47,13 @@ export const toggleLikes = async (id, uid) => {
     const docSnap = await getDoc(docRef)
     const likesArr = docSnap.data().likes || []
     if (likesArr.includes(uid)) {
-        console.log('unlike');
         await updateDoc(docRef, {likes: likesArr.filter(id => id !== uid)})
     } else {
-        console.log('like');
         await updateDoc(docRef, {likes: [...likesArr, uid]})
     }
 }
 
 export const updatePost = async (id, {title, category, story}) => {
-    console.log('CU: ', id, title, category, story);
     const docRef = doc(db, 'posts', id)
     await updateDoc(docRef, {title, category, story})
 }

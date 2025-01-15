@@ -60,7 +60,6 @@ export const Profile = () => {
     };
 
     const onSubmit = async (data) => {
-        console.log("Name change form submitted:", data.displayName);
         setLoading(true);
         try {
             let fileUrl = user.photoURL;
@@ -77,7 +76,6 @@ export const Profile = () => {
                 }
             }
             await updateUser(data.displayName || user.displayName, fileUrl);
-            console.log("User updated with:", data.displayName, fileUrl);
             toast.success('Profile updated successfully!');
         } catch (error) {
             console.error("Error in name change:", error.message);
@@ -88,7 +86,6 @@ export const Profile = () => {
     };
 
     const handleDeleteAccount = async (password) => {
-        console.log("Delete account triggered with password:", password);
         setDeleting(true);
         try {
             const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
