@@ -21,7 +21,7 @@ export const Posts = () => {
         <Box
             sx={{
                 display: 'flex',
-                flexDirection: 'row',
+                flexDirection: { xs: 'column', md: 'row' }, // Column for small screens, row for larger screens
                 gap: 2,
                 maxWidth: '1200px',
                 margin: '0 auto',
@@ -35,7 +35,7 @@ export const Posts = () => {
             {/* Sidebar for Categories */}
             <Box
                 sx={{
-                    width: '250px',
+                    width: { xs: '100%', md: '250px' }, // Full width on small screens, fixed width on larger screens
                     padding: '15px',
                     backgroundColor: 'background.paper',
                     borderRadius: '8px',
